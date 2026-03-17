@@ -3,523 +3,261 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>March Madness Monte Carlo Bracket Simulator - Thought Logic</title>
+<title>March Madness Monte Carlo Bracket Simulator</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#fff; color:#111827; }
-input[type=range] { -webkit-appearance:none; appearance:none; height:4px; background:#e5e7eb; border-radius:2px; outline:none; }
-input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:#2563eb; cursor:pointer; }
-select { outline:none; }
-details summary { list-style: none; }
-details summary::-webkit-details-marker { display: none; }
-details summary::before { content: "▶ "; font-size: 10px; }
-details[open] summary::before { content: "▼ "; font-size: 10px; }
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#e5e7eb;color:#111827;}
+input[type=range]{-webkit-appearance:none;appearance:none;height:3px;background:#e5e7eb;border-radius:2px;outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:#2563eb;cursor:pointer;}
+select{outline:none;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:#f1f1f1;}
+::-webkit-scrollbar-thumb{background:#ccc;border-radius:3px;}
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const LOGO_B64 = "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";
 const { useState, useCallback } = React;
 
-// ============ TEAM DATA ============
+// [seed, region, kpRank, adjO, adjD, tempoRk, threeVar, experience, champProfile, homeCourt]
+// homeCourt: 0=neutral, 1=nearby, 2=home city (rounds 1-2 only)
 const RAW = {
-  "Duke":[1,"East",1,4,2,85,0.50,1,true],"Siena":[16,"East",192,208,175,200,0.35,4,false],
-  "Ohio State":[8,"East",26,17,53,70,0.60,3,false],"TCU":[9,"East",43,81,22,220,0.40,3,false],
-  "St. John's":[5,"East",16,44,12,160,0.45,3,false],"Northern Iowa":[12,"East",71,153,24,355,0.30,5,false],
-  "Kansas":[4,"East",21,57,10,140,0.50,2,false],"Cal Baptist":[13,"East",106,191,49,175,0.40,4,false],
-  "Louisville":[6,"East",19,20,25,130,0.50,3,true],"South Florida":[11,"East",49,58,48,55,0.55,3,false],
-  "Michigan State":[3,"East",9,24,13,150,0.40,4,false],"North Dakota St":[14,"East",113,124,123,190,0.35,4,false],
-  "UCLA":[7,"East",27,22,54,110,0.55,3,false],"UCF":[10,"East",54,40,101,60,0.60,3,false],
-  "UConn":[2,"East",12,30,11,170,0.50,4,false],"Furman":[15,"East",190,200,182,210,0.35,4,false],
-  "Arizona":[1,"West",3,5,3,100,0.50,2,true],"LIU":[16,"West",216,239,186,195,0.40,4,false],
-  "Villanova":[8,"West",33,41,35,155,0.55,3,false],"Utah State":[9,"West",30,28,44,165,0.45,4,false],
-  "Wisconsin":[5,"West",22,11,51,120,0.65,4,false],"High Point":[12,"West",92,66,161,50,0.55,5,false],
-  "Arkansas":[4,"West",18,6,52,40,0.70,2,false],"Hawaii":[13,"West",107,207,42,180,0.45,4,false],
-  "BYU":[6,"West",23,10,57,75,0.75,2,false],"Texas":[11,"West",37,13,111,65,0.60,2,false],
-  "NC State":[11,"West",34,19,86,80,0.60,3,false],"Gonzaga":[3,"West",10,29,9,145,0.45,3,false],
-  "Kennesaw St":[14,"West",163,144,195,200,0.40,4,false],"Miami FL":[7,"West",31,33,38,135,0.55,3,false],
-  "Missouri":[10,"West",52,50,77,45,0.55,3,false],"Purdue":[2,"West",8,2,36,90,0.60,3,false],
-  "Queens":[15,"West",181,77,322,95,0.70,4,false],
-  "Michigan":[1,"Midwest",2,8,1,115,0.50,3,true],"UMBC":[16,"Midwest",185,184,193,185,0.40,4,false],
-  "Howard":[16,"Midwest",207,283,118,210,0.35,4,false],"Georgia":[8,"Midwest",32,16,80,35,0.65,2,false],
-  "Saint Louis":[9,"Midwest",41,51,41,175,0.40,4,false],"Texas Tech":[5,"Midwest",20,12,33,125,0.45,3,false],
-  "Akron":[12,"Midwest",64,54,113,160,0.45,4,false],"Alabama":[4,"Midwest",17,3,67,5,0.85,2,false],
-  "Hofstra":[13,"Midwest",88,89,96,140,0.50,4,false],"Tennessee":[6,"Midwest",15,37,15,270,0.30,4,false],
-  "SMU":[11,"Midwest",42,26,91,55,0.55,3,false],"Miami OH":[11,"Midwest",93,70,156,150,0.45,5,false],
-  "Virginia":[3,"Midwest",13,27,16,310,0.30,4,false],"Wright State":[14,"Midwest",140,117,194,170,0.40,4,false],
-  "Kentucky":[7,"Midwest",28,39,27,130,0.55,2,false],"Santa Clara":[10,"Midwest",35,23,82,145,0.50,4,false],
-  "Iowa State":[2,"Midwest",6,21,4,155,0.40,4,true],"Tennessee St":[15,"Midwest",187,173,212,190,0.40,4,false],
-  "Florida":[1,"South",4,9,6,95,0.50,3,true],"Prairie View":[16,"South",288,310,231,215,0.35,4,false],
-  "Lehigh":[16,"South",284,290,257,240,0.35,4,false],"Clemson":[8,"South",36,71,20,250,0.35,3,false],
-  "Iowa":[9,"South",25,31,31,340,0.45,4,false],"Vanderbilt":[5,"South",11,7,29,80,0.60,3,true],
-  "McNeese":[12,"South",68,91,47,60,0.50,4,false],"Nebraska":[4,"South",14,55,7,200,0.35,3,false],
-  "Troy":[13,"South",143,141,166,180,0.45,4,false],"North Carolina":[6,"South",29,32,37,105,0.55,2,false],
-  "VCU":[11,"South",46,46,63,70,0.50,4,false],"Illinois":[3,"South",7,1,28,65,0.55,3,false],
-  "Penn":[14,"South",159,215,112,100,0.45,4,false],"Saint Mary's":[7,"South",24,43,19,300,0.30,4,false],
-  "Texas A&M":[10,"South",39,49,40,20,0.55,3,false],"Houston":[2,"South",5,14,5,260,0.35,4,true],
-  "Idaho":[15,"South",145,176,136,185,0.40,5,false],
+  "Duke":[1,"East",1,4,2,85,.50,1,true,0],"Siena":[16,"East",192,208,175,200,.35,4,false,0],
+  "Ohio State":[8,"East",26,17,53,70,.60,3,false,0],"TCU":[9,"East",43,81,22,220,.40,3,false,0],
+  "St. John's":[5,"East",16,44,12,160,.45,3,false,1],"Northern Iowa":[12,"East",71,153,24,355,.30,5,false,0],
+  "Kansas":[4,"East",21,57,10,140,.50,2,false,0],"Cal Baptist":[13,"East",106,191,49,175,.40,4,false,0],
+  "Louisville":[6,"East",19,20,25,130,.50,3,true,0],"South Florida":[11,"East",49,58,48,55,.55,3,false,2],
+  "Michigan State":[3,"East",9,24,13,150,.40,4,false,0],"North Dakota St":[14,"East",113,124,123,190,.35,4,false,0],
+  "UCLA":[7,"East",27,22,54,110,.55,3,false,0],"UCF":[10,"East",54,40,101,60,.60,3,false,0],
+  "UConn":[2,"East",12,30,11,170,.50,4,false,0],"Furman":[15,"East",190,200,182,210,.35,4,false,2],
+  "Arizona":[1,"West",3,5,3,100,.50,2,true,1],"LIU":[16,"West",216,239,186,195,.40,4,false,0],
+  "Villanova":[8,"West",33,41,35,155,.55,3,false,2],"Utah State":[9,"West",30,28,44,165,.45,4,false,0],
+  "Wisconsin":[5,"West",22,11,51,120,.65,4,false,0],"High Point":[12,"West",92,66,161,50,.55,5,false,0],
+  "Arkansas":[4,"West",18,6,52,40,.70,2,false,0],"Hawaii":[13,"West",107,207,42,180,.45,4,false,0],
+  "BYU":[6,"West",23,10,57,75,.75,2,false,0],"Texas":[11,"West",37,13,111,65,.60,2,false,0],
+  "NC State":[11,"West",34,19,86,80,.60,3,false,0],"Gonzaga":[3,"West",10,29,9,145,.45,3,false,0],
+  "Kennesaw St":[14,"West",163,144,195,200,.40,4,false,0],"Miami FL":[7,"West",31,33,38,135,.55,3,false,0],
+  "Missouri":[10,"West",52,50,77,45,.55,3,false,2],"Purdue":[2,"West",8,2,36,90,.60,3,false,0],
+  "Queens":[15,"West",181,77,322,95,.70,4,false,0],
+  "Michigan":[1,"Midwest",2,8,1,115,.50,3,true,0],"UMBC":[16,"Midwest",185,184,193,185,.40,4,false,0],
+  "Howard":[16,"Midwest",207,283,118,210,.35,4,false,0],"Georgia":[8,"Midwest",32,16,80,35,.65,2,false,0],
+  "Saint Louis":[9,"Midwest",41,51,41,175,.40,4,false,2],"Texas Tech":[5,"Midwest",20,12,33,125,.45,3,false,0],
+  "Akron":[12,"Midwest",64,54,113,160,.45,4,false,0],"Alabama":[4,"Midwest",17,3,67,5,.85,2,false,0],
+  "Hofstra":[13,"Midwest",88,89,96,140,.50,4,false,0],"Tennessee":[6,"Midwest",15,37,15,270,.30,4,false,0],
+  "SMU":[11,"Midwest",42,26,91,55,.55,3,false,0],"Miami OH":[11,"Midwest",93,70,156,150,.45,5,false,0],
+  "Virginia":[3,"Midwest",13,27,16,310,.30,4,false,0],"Wright State":[14,"Midwest",140,117,194,170,.40,4,false,0],
+  "Kentucky":[7,"Midwest",28,39,27,130,.55,2,false,0],"Santa Clara":[10,"Midwest",35,23,82,145,.50,4,false,0],
+  "Iowa State":[2,"Midwest",6,21,4,155,.40,4,true,0],"Tennessee St":[15,"Midwest",187,173,212,190,.40,4,false,0],
+  "Florida":[1,"South",4,9,6,95,.50,3,true,0],"Prairie View":[16,"South",288,310,231,215,.35,4,false,0],
+  "Lehigh":[16,"South",284,290,257,240,.35,4,false,0],"Clemson":[8,"South",36,71,20,250,.35,3,false,1],
+  "Iowa":[9,"South",25,31,31,340,.45,4,false,0],"Vanderbilt":[5,"South",11,7,29,80,.60,3,true,0],
+  "McNeese":[12,"South",68,91,47,60,.50,4,false,0],"Nebraska":[4,"South",14,55,7,200,.35,3,false,0],
+  "Troy":[13,"South",143,141,166,180,.45,4,false,0],"North Carolina":[6,"South",29,32,37,105,.55,2,false,0],
+  "VCU":[11,"South",46,46,63,70,.50,4,false,0],"Illinois":[3,"South",7,1,28,65,.55,3,false,0],
+  "Penn":[14,"South",159,215,112,100,.45,4,false,0],"Saint Mary's":[7,"South",24,43,19,300,.30,4,false,0],
+  "Texas A&M":[10,"South",39,49,40,20,.55,3,false,0],"Houston":[2,"South",5,14,5,260,.35,4,true,0],
+  "Idaho":[15,"South",145,176,136,185,.40,5,false,0],
 };
-const TEAMS = Object.entries(RAW).map(([name, d]) => ({
-  name, seed:d[0], region:d[1], kpRank:d[2], adjO:d[3], adjD:d[4],
-  tempo:d[5], threeVar:d[6], exp:d[7], champProfile:d[8]
-}));
-const getTeam = n => TEAMS.find(t => t.name === n);
+const TEAMS=Object.entries(RAW).map(([name,d])=>({name,seed:d[0],region:d[1],kpRank:d[2],adjO:d[3],adjD:d[4],tempo:d[5],threeVar:d[6],exp:d[7],champProfile:d[8],homeCourt:d[9]}));
+const getTeam=n=>TEAMS.find(t=>t.name===n);
+const FIRST_FOUR=[["UMBC","Howard"],["SMU","Miami OH"],["Texas","NC State"],["Prairie View","Lehigh"]];
+const REGION_MATCHUPS={East:[["Duke","Siena"],["Ohio State","TCU"],["St. John's","Northern Iowa"],["Kansas","Cal Baptist"],["Louisville","South Florida"],["Michigan State","North Dakota St"],["UCLA","UCF"],["UConn","Furman"]],West:[["Arizona","LIU"],["Villanova","Utah State"],["Wisconsin","High Point"],["Arkansas","Hawaii"],["BYU","FF_WEST_11"],["Gonzaga","Kennesaw St"],["Miami FL","Missouri"],["Purdue","Queens"]],Midwest:[["Michigan","FF_MW_16"],["Georgia","Saint Louis"],["Texas Tech","Akron"],["Alabama","Hofstra"],["Tennessee","FF_MW_11"],["Virginia","Wright State"],["Kentucky","Santa Clara"],["Iowa State","Tennessee St"]],South:[["Florida","FF_SOUTH_16"],["Clemson","Iowa"],["Vanderbilt","McNeese"],["Nebraska","Troy"],["North Carolina","VCU"],["Illinois","Penn"],["Saint Mary's","Texas A&M"],["Houston","Idaho"]]};
+const FF_MATCHUPS=[["East","West"],["South","Midwest"]];
+const REGIONS=["East","West","Midwest","South"];
 
-const FIRST_FOUR = [["UMBC","Howard"],["SMU","Miami OH"],["Texas","NC State"],["Prairie View","Lehigh"]];
-const REGION_MATCHUPS = {
-  East: [["Duke","Siena"],["Ohio State","TCU"],["St. John's","Northern Iowa"],["Kansas","Cal Baptist"],["Louisville","South Florida"],["Michigan State","North Dakota St"],["UCLA","UCF"],["UConn","Furman"]],
-  West: [["Arizona","LIU"],["Villanova","Utah State"],["Wisconsin","High Point"],["Arkansas","Hawaii"],["BYU","FF_WEST_11"],["Gonzaga","Kennesaw St"],["Miami FL","Missouri"],["Purdue","Queens"]],
-  Midwest: [["Michigan","FF_MW_16"],["Georgia","Saint Louis"],["Texas Tech","Akron"],["Alabama","Hofstra"],["Tennessee","FF_MW_11"],["Virginia","Wright State"],["Kentucky","Santa Clara"],["Iowa State","Tennessee St"]],
-  South: [["Florida","FF_SOUTH_16"],["Clemson","Iowa"],["Vanderbilt","McNeese"],["Nebraska","Troy"],["North Carolina","VCU"],["Illinois","Penn"],["Saint Mary's","Texas A&M"],["Houston","Idaho"]],
-};
-const FF_MATCHUPS = [["East","West"],["South","Midwest"]];
-const REGIONS = ["East","West","Midwest","South"];
-
-// ============ CORE SIM ============
-function gaussRandom() {
-  let u=0,v=0; while(u===0)u=Math.random(); while(v===0)v=Math.random();
-  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
-}
-function teamStr(team, opp, round, w) {
-  const offP=(366-team.adjO)/365, defP=(366-team.adjD)/365, emP=(366-team.kpRank)/365;
-  const tW=w.offense+w.defense+w.overall;
-  let s=(offP*w.offense+defP*w.defense+emP*w.overall)/tW*100;
-  if(team.champProfile) s+=w.champBonus;
-  s+=(team.exp/5)*w.experience*[0,0.15,0.35,0.65,0.85,1.0][Math.min(round,5)];
-  s-=((366-opp.adjD)/365)*w.defSuppression;
+// ============ ENGINE ============
+function gaussRandom(){let u=0,v=0;while(u===0)u=Math.random();while(v===0)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function teamStr(t,o,r,w){
+  const oP=(366-t.adjO)/365,dP=(366-t.adjD)/365,eP=(366-t.kpRank)/365,tW=w.offense+w.defense+w.overall;
+  let s=(oP*w.offense+dP*w.defense+eP*w.overall)/tW*100;
+  if(t.champProfile) s+=w.champBonus;
+  s+=(t.exp/5)*w.experience*[0,.15,.35,.65,.85,1][Math.min(r,5)];
+  s-=((366-o.adjD)/365)*w.defSuppression;
+  if(r<=2 && t.homeCourt>0) s+=t.homeCourt*w.homeCourt*0.5;
   return s;
 }
-function simOnce(a,b,round,w) {
-  let diff=teamStr(a,b,round,w)-teamStr(b,a,round,w);
-  const vol=w.chaos*4+Math.abs(a.tempo-b.tempo)/365*w.tempo*6+(a.threeVar+b.threeVar)/2*w.threePt*4;
-  diff+=gaussRandom()*vol;
-  return Math.random()<1/(1+Math.exp(-diff*0.05))?a:b;
-}
+function simOnce(a,b,r,w){let d=teamStr(a,b,r,w)-teamStr(b,a,r,w);d+=gaussRandom()*(w.chaos*4+Math.abs(a.tempo-b.tempo)/365*w.tempo*6+(a.threeVar+b.threeVar)/2*w.threePt*4);return Math.random()<1/(1+Math.exp(-d*.05))?a:b;}
+function simMatchup(a,b,r,w,n){let aW=0;for(let i=0;i<n;i++)if(simOnce(a,b,r,w).name===a.name)aW++;const aP=aW/n*100;return{a,b,favPct:Math.max(aP,100-aP),dogPct:Math.min(aP,100-aP),fav:aP>=50?a:b,dog:aP>=50?b:a};}
 
-// Sim one matchup N times. Returns structured result.
-function simMatchup(a,b,round,w,n) {
-  let aW=0; for(let i=0;i<n;i++) if(simOnce(a,b,round,w).name===a.name) aW++;
-  const aP=aW/n*100, bP=100-aP;
-  const fav=aP>=bP?a:b, dog=aP>=bP?b:a;
-  return { a, b, favPct:Math.max(aP,bP), dogPct:Math.min(aP,bP), fav, dog };
-}
+const R64_UPSETS={"1-16":0,"2-15":0,"3-14":1,"4-13":1,"5-12":1,"6-11":2,"7-10":2,"8-9":2};
+const LATER_UPSETS={2:2,3:1,4:0};
+function tierKey(a,b){return`${Math.min(a.seed,b.seed)}-${Math.max(a.seed,b.seed)}`;}
+function trueUpR64(games){const tiers={};games.forEach((g,i)=>{const k=tierKey(g.a,g.b);if(!tiers[k])tiers[k]=[];tiers[k].push({...g,i});});const flips=new Set();for(const[key,tg]of Object.entries(tiers)){const exp=R64_UPSETS[key]||0;if(!exp)continue;const nat=tg.filter(g=>g.winner.seed>Math.min(g.a.seed,g.b.seed)).length;const need=exp-nat;if(need<=0)continue;const ch=tg.filter(g=>g.winner.seed<=Math.min(g.a.seed,g.b.seed)).sort((a,b)=>b.dogPct-a.dogPct);for(let j=0;j<Math.min(need,ch.length);j++)flips.add(ch[j].i);}return flips;}
+function trueUpLater(games,rn){const exp=LATER_UPSETS[rn]||0;if(!exp)return new Set();const nat=games.filter(g=>g.winner.seed>Math.min(g.a.seed,g.b.seed)).length;if(exp-nat<=0)return new Set();const ch=games.map((g,i)=>({...g,i})).filter(g=>g.winner.seed<=Math.min(g.a.seed,g.b.seed)&&g.dogPct>=20&&Math.abs(g.a.seed-g.b.seed)<=3).sort((a,b)=>b.dogPct-a.dogPct);const f=new Set();for(let j=0;j<Math.min(exp-nat,ch.length);j++)f.add(ch[j].i);return f;}
 
-// ============ HISTORICAL TRUE-UP ============
-// R64: expected upsets per seed tier (across all 4 regions)
-const R64_UPSETS = {"1-16":0,"2-15":0,"3-14":1,"4-13":1,"5-12":1,"6-11":2,"7-10":2,"8-9":2};
-// Later: expected upsets across entire round (all regions combined)
-const LATER_UPSETS = {2:2, 3:1, 4:0};
+function getT(name,ff){if(name==="FF_MW_16")return ff["UMBC|Howard"];if(name==="FF_MW_11")return ff["SMU|Miami OH"];if(name==="FF_WEST_11")return ff["Texas|NC State"];if(name==="FF_SOUTH_16")return ff["Prairie View|Lehigh"];return getTeam(name);}
+function generateBracket(w,n,mode){const ff={};for(const[a,b]of FIRST_FOUR){const r=simMatchup(getTeam(a),getTeam(b),0,w,n);ff[a+"|"+b]=r.fav;}const rNames=["R64","R32","S16","E8"];const bracket={regions:{}};const allR64={};for(const rn of REGIONS){allR64[rn]=REGION_MATCHUPS[rn].map(([an,bn])=>{const a=getT(an,ff),b=getT(bn,ff),sim=simMatchup(a,b,1,w,n);let winner=mode==="chaos"?(Math.random()*100<sim.favPct?sim.fav:sim.dog):sim.fav;return{a,b,winner,pct:sim.favPct,dogPct:sim.dogPct,dog:sim.dog,fav:sim.fav};});}
+if(mode==="upside"){const flat=[];REGIONS.forEach(rn=>allR64[rn].forEach((g,i)=>flat.push({...g,ri:rn,gi:i})));const flips=trueUpR64(flat);let idx=0;REGIONS.forEach(rn=>allR64[rn].forEach(g=>{if(flips.has(idx)){g.winner=g.dog;g.pct=g.dogPct;}idx++;}));}
+for(const rn of REGIONS){const rounds=[];const r64=allR64[rn].map(g=>({a:g.a,b:g.b,winner:g.winner,pct:(g.winner.name===g.fav.name?g.pct:g.dogPct).toFixed(0)}));rounds.push({name:rNames[0],games:r64});let prev=r64.map(g=>g.winner);for(let ri=1;ri<4;ri++){const rNum=ri+1,pairs=[];for(let i=0;i<prev.length;i+=2)pairs.push([prev[i],prev[i+1]]);const games=pairs.map(([a,b])=>{const sim=simMatchup(a,b,rNum,w,n);let winner=mode==="chaos"?(Math.random()*100<sim.favPct?sim.fav:sim.dog):sim.fav;return{a,b,winner,pct:sim.favPct,dogPct:sim.dogPct,dog:sim.dog,fav:sim.fav};});if(mode==="upside"&&games.length>1){trueUpLater(games,rNum).forEach(idx=>{games[idx].winner=games[idx].dog;});}const cl=games.map(g=>({a:g.a,b:g.b,winner:g.winner,pct:(g.winner.name===g.fav.name?g.pct:g.dogPct).toFixed(0)}));rounds.push({name:rNames[ri],games:cl});prev=cl.map(g=>g.winner);}bracket.regions[rn]={rounds,champion:rounds[3].games[0].winner};}
+const s1a=bracket.regions[FF_MATCHUPS[0][0]].champion,s1b=bracket.regions[FF_MATCHUPS[0][1]].champion,s2a=bracket.regions[FF_MATCHUPS[1][0]].champion,s2b=bracket.regions[FF_MATCHUPS[1][1]].champion;const sim1=simMatchup(s1a,s1b,5,w,n),sim2=simMatchup(s2a,s2b,5,w,n);const w1=mode==="chaos"?(Math.random()*100<sim1.favPct?sim1.fav:sim1.dog):sim1.fav;const w2=mode==="chaos"?(Math.random()*100<sim2.favPct?sim2.fav:sim2.dog):sim2.fav;const simF=simMatchup(w1,w2,5,w,n);const champ=mode==="chaos"?(Math.random()*100<simF.favPct?simF.fav:simF.dog):simF.fav;
+bracket.finalFour={semi1:{a:s1a,b:s1b,winner:w1,pct:(w1.name===sim1.fav.name?sim1.favPct:sim1.dogPct).toFixed(0)},semi2:{a:s2a,b:s2b,winner:w2,pct:(w2.name===sim2.fav.name?sim2.favPct:sim2.dogPct).toFixed(0)},final:{a:w1,b:w2,winner:champ,pct:(champ.name===simF.fav.name?simF.favPct:simF.dogPct).toFixed(0)}};return bracket;}
 
-function tierKey(a,b) { const lo=Math.min(a.seed,b.seed),hi=Math.max(a.seed,b.seed); return `${lo}-${hi}`; }
-
-function trueUpR64(games) {
-  // Group all 32 R64 games by seed tier, flip best underdogs to match historical rates
-  const tiers={};
-  games.forEach((g,i) => { const k=tierKey(g.a,g.b); if(!tiers[k])tiers[k]=[]; tiers[k].push({...g,i}); });
-  const flips=new Set();
-  for(const [key,tg] of Object.entries(tiers)) {
-    const exp=R64_UPSETS[key]||0; if(!exp) continue;
-    // Count natural upsets (higher seed# won)
-    const natural=tg.filter(g=>g.winner.seed>Math.min(g.a.seed,g.b.seed)).length;
-    const need=exp-natural; if(need<=0) continue;
-    // Rank remaining chalk games by dogPct, flip top N
-    const chalk=tg.filter(g=>g.winner.seed<=Math.min(g.a.seed,g.b.seed)).sort((a,b)=>b.dogPct-a.dogPct);
-    for(let j=0;j<Math.min(need,chalk.length);j++) flips.add(chalk[j].i);
-  }
-  return flips;
-}
-
-function trueUpLater(games, roundNum) {
-  const exp=LATER_UPSETS[roundNum]||0; if(!exp) return new Set();
-  const natural=games.filter(g=>g.winner.seed>Math.min(g.a.seed,g.b.seed)).length;
-  const need=exp-natural; if(need<=0) return new Set();
-  const chalk=games.map((g,i)=>({...g,i}))
-    .filter(g=>g.winner.seed<=Math.min(g.a.seed,g.b.seed))
-    .filter(g=>g.dogPct>=20)
-    .sort((a,b)=>b.dogPct-a.dogPct);
-  const flips=new Set();
-  for(let j=0;j<Math.min(need,chalk.length);j++) flips.add(chalk[j].i);
-  return flips;
-}
-
-// ============ BRACKET PIPELINE ============
-function getT(name, ff) {
-  if(name==="FF_MW_16") return ff["UMBC|Howard"];
-  if(name==="FF_MW_11") return ff["SMU|Miami OH"];
-  if(name==="FF_WEST_11") return ff["Texas|NC State"];
-  if(name==="FF_SOUTH_16") return ff["Prairie View|Lehigh"];
-  return getTeam(name);
-}
-
-function generateBracket(w, n, mode) {
-  // Step 0: First Four (always chalk)
-  const ff={};
-  for(const [a,b] of FIRST_FOUR) {
-    const r=simMatchup(getTeam(a),getTeam(b),0,w,n);
-    ff[a+"|"+b]=r.fav;
-  }
-
-  const roundNames=["Round of 64","Round of 32","Sweet 16","Elite Eight"];
-  const bracket={regions:{}};
-
-  // Step 1: Sim ALL R64 games across all regions (N times each)
-  const allR64={}; // region -> [{a,b,sim,winner,dogPct,dog}]
-  for(const rn of REGIONS) {
-    allR64[rn]=REGION_MATCHUPS[rn].map(([an,bn])=>{
-      const a=getT(an,ff), b=getT(bn,ff);
-      const sim=simMatchup(a,b,1,w,n);
-      let winner;
-      if(mode==="chaos") winner=Math.random()*100<sim.favPct?sim.fav:sim.dog;
-      else winner=sim.fav;
-      return { a, b, winner, pct:sim.favPct, dogPct:sim.dogPct, dog:sim.dog, fav:sim.fav };
-    });
-  }
-
-  // Step 2: True-up R64 for upside
-  if(mode==="upside") {
-    const flat=[]; REGIONS.forEach(rn=>allR64[rn].forEach((g,i)=>flat.push({...g,ri:rn,gi:i})));
-    const flips=trueUpR64(flat);
-    let idx=0;
-    REGIONS.forEach(rn=>allR64[rn].forEach((g,i)=>{
-      if(flips.has(idx)){g.winner=g.dog;g.pct=g.dogPct;g.flipped=true;}
-      idx++;
-    }));
-  }
-
-  // Step 3: For each region, lock R64 and sim round by round
-  for(const rn of REGIONS) {
-    const rounds=[];
-    // R64
-    const r64=allR64[rn].map(g=>({
-      a:g.a, b:g.b, winner:g.winner,
-      pct:(g.winner.name===g.fav.name?g.pct:g.dogPct).toFixed(0),
-    }));
-    rounds.push({name:roundNames[0],games:r64});
-    let prev=r64.map(g=>g.winner);
-
-    // R32, S16, E8
-    for(let ri=1;ri<4;ri++) {
-      const roundNum=ri+1;
-      const pairs=[]; for(let i=0;i<prev.length;i+=2) pairs.push([prev[i],prev[i+1]]);
-
-      const games=pairs.map(([a,b])=>{
-        const sim=simMatchup(a,b,roundNum,w,n);
-        let winner;
-        if(mode==="chaos") winner=Math.random()*100<sim.favPct?sim.fav:sim.dog;
-        else winner=sim.fav;
-        return { a, b, winner, pct:sim.favPct, dogPct:sim.dogPct, dog:sim.dog, fav:sim.fav };
-      });
-
-      // True-up for upside
-      if(mode==="upside" && games.length>1) {
-        const flips=trueUpLater(games,roundNum);
-        flips.forEach(idx=>{
-          games[idx].winner=games[idx].dog;
-          games[idx].flipped=true;
-        });
-      }
-
-      const clean=games.map(g=>({
-        a:g.a, b:g.b, winner:g.winner,
-        pct:(g.winner.name===g.fav.name?g.pct:g.dogPct).toFixed(0),
-      }));
-      rounds.push({name:roundNames[ri],games:clean});
-      prev=clean.map(g=>g.winner);
-    }
-    bracket.regions[rn]={rounds, champion:rounds[3].games[0].winner};
-  }
-
-  // Step 4: Final Four
-  const s1a=bracket.regions[FF_MATCHUPS[0][0]].champion, s1b=bracket.regions[FF_MATCHUPS[0][1]].champion;
-  const s2a=bracket.regions[FF_MATCHUPS[1][0]].champion, s2b=bracket.regions[FF_MATCHUPS[1][1]].champion;
-  const sim1=simMatchup(s1a,s1b,5,w,n), sim2=simMatchup(s2a,s2b,5,w,n);
-  const w1=mode==="chaos"?(Math.random()*100<sim1.favPct?sim1.fav:sim1.dog):sim1.fav;
-  const w2=mode==="chaos"?(Math.random()*100<sim2.favPct?sim2.fav:sim2.dog):sim2.fav;
-  const simF=simMatchup(w1,w2,5,w,n);
-  const champ=mode==="chaos"?(Math.random()*100<simF.favPct?simF.fav:simF.dog):simF.fav;
-
-  bracket.finalFour={
-    semi1:{a:s1a,b:s1b,winner:w1,pct:(w1.name===sim1.fav.name?sim1.favPct:sim1.dogPct).toFixed(0)},
-    semi2:{a:s2a,b:s2b,winner:w2,pct:(w2.name===sim2.fav.name?sim2.favPct:sim2.dogPct).toFixed(0)},
-    final:{a:w1,b:w2,winner:champ,pct:(champ.name===simF.fav.name?simF.favPct:simF.dogPct).toFixed(0)},
-  };
-  return bracket;
-}
-
-// ============ LEADERBOARD ============
-function runLeaderboard(w, n) {
-  const ct={champ:{},f4:{},e8:{},s16:{}};
-  for(let i=0;i<n;i++) {
-    const b=generateBracket(w,1,"chaos");
-    ct.champ[b.finalFour.final.winner.name]=(ct.champ[b.finalFour.final.winner.name]||0)+1;
-    [b.finalFour.semi1.a,b.finalFour.semi1.b,b.finalFour.semi2.a,b.finalFour.semi2.b].forEach(t=>{ct.f4[t.name]=(ct.f4[t.name]||0)+1;});
-    for(const r of Object.values(b.regions)){
-      if(r.rounds[3]){const g=r.rounds[3].games[0];ct.e8[g.a.name]=(ct.e8[g.a.name]||0)+1;ct.e8[g.b.name]=(ct.e8[g.b.name]||0)+1;}
-      if(r.rounds[2])r.rounds[2].games.forEach(g=>{ct.s16[g.a.name]=(ct.s16[g.a.name]||0)+1;ct.s16[g.b.name]=(ct.s16[g.b.name]||0)+1;});
-    }
-  }
-  return Object.entries(ct.champ).map(([name,c])=>{
-    const t=getTeam(name);
-    return{name,seed:t.seed,region:t.region,kpRank:t.kpRank,champProfile:t.champProfile,
-      champPct:(c/n*100).toFixed(1),f4Pct:((ct.f4[name]||0)/n*100).toFixed(1),
-      e8Pct:((ct.e8[name]||0)/n*100).toFixed(1),s16Pct:((ct.s16[name]||0)/n*100).toFixed(1)};
-  }).sort((a,b)=>b.champPct-a.champPct);
-}
+function runLeaderboard(w,n){const ct={champ:{},f4:{},e8:{},s16:{}};for(let i=0;i<n;i++){const b=generateBracket(w,1,"chaos");ct.champ[b.finalFour.final.winner.name]=(ct.champ[b.finalFour.final.winner.name]||0)+1;[b.finalFour.semi1.a,b.finalFour.semi1.b,b.finalFour.semi2.a,b.finalFour.semi2.b].forEach(t=>{ct.f4[t.name]=(ct.f4[t.name]||0)+1;});for(const r of Object.values(b.regions)){if(r.rounds[3]){const g=r.rounds[3].games[0];ct.e8[g.a.name]=(ct.e8[g.a.name]||0)+1;ct.e8[g.b.name]=(ct.e8[g.b.name]||0)+1;}if(r.rounds[2])r.rounds[2].games.forEach(g=>{ct.s16[g.a.name]=(ct.s16[g.a.name]||0)+1;ct.s16[g.b.name]=(ct.s16[g.b.name]||0)+1;});}}return Object.entries(ct.champ).map(([name,c])=>{const t=getTeam(name);return{name,seed:t.seed,region:t.region,kpRank:t.kpRank,champProfile:t.champProfile,champPct:(c/n*100).toFixed(1),f4Pct:((ct.f4[name]||0)/n*100).toFixed(1),e8Pct:((ct.e8[name]||0)/n*100).toFixed(1),s16Pct:((ct.s16[name]||0)/n*100).toFixed(1)};}).sort((a,b)=>b.champPct-a.champPct);}
 
 // ============ UI ============
-const DEFAULT_W={offense:3,defense:3,overall:4,defSuppression:3,tempo:2,threePt:2,experience:3,champBonus:3,chaos:3};
+const DEFAULT_W={offense:3,defense:3,overall:4,defSuppression:2,tempo:2,threePt:2,experience:3,champBonus:1,chaos:3,homeCourt:2};
 const RC={East:"#dc2626",West:"#2563eb",Midwest:"#16a34a",South:"#d97706"};
 
-function Slider({label,value,onChange,desc}){
-  return(<div style={{marginBottom:12}}>
-    <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"#374151",marginBottom:1}}>
-      <span style={{fontWeight:600}}>{label}</span><span style={{color:"#111827",fontWeight:700}}>{value}</span>
-    </div>
-    {desc&&<div style={{fontSize:10,color:"#6b7280",marginBottom:3,lineHeight:1.3}}>{desc}</div>}
-    <input type="range" min={0} max={10} step={1} value={value} onChange={e=>onChange(Number(e.target.value))}
-      style={{width:"100%",accentColor:"#2563eb",height:4,cursor:"pointer"}}/>
-  </div>);
-}
+function Sl({label,value,onChange,desc}){return(<div style={{marginBottom:10}}><div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"#374151"}}><span style={{fontWeight:600}}>{label}</span><span style={{fontWeight:700}}>{value}</span></div>{desc&&<div style={{fontSize:9,color:"#9ca3af",lineHeight:1.2,marginBottom:2}}>{desc}</div>}<input type="range" min={0} max={10} step={1} value={value} onChange={e=>onChange(+e.target.value)} style={{width:"100%",accentColor:"#2563eb",height:3,cursor:"pointer"}}/></div>);}
 
-function GameRow({g}){
-  const loserSeed=g.winner?.name===g.a?.name?g.b?.seed:g.a?.seed;
-  const isUpset=g.winner?.seed>loserSeed;
-  return(<div style={{display:"flex",alignItems:"center",gap:8,padding:"3px 0",fontSize:13}}>
-    <span style={{color:"#9ca3af",width:18,textAlign:"right",fontSize:11}}>({g.a?.seed})</span>
-    <span style={{color:g.winner?.name===g.a?.name?"#111827":"#9ca3af",fontWeight:g.winner?.name===g.a?.name?700:400,minWidth:110}}>{g.a?.name}</span>
-    <span style={{color:"#d1d5db",fontSize:11}}>vs</span>
-    <span style={{color:"#9ca3af",width:18,textAlign:"right",fontSize:11}}>({g.b?.seed})</span>
-    <span style={{color:g.winner?.name===g.b?.name?"#111827":"#9ca3af",fontWeight:g.winner?.name===g.b?.name?700:400,minWidth:110}}>{g.b?.name}</span>
-    <span style={{fontSize:10,color:isUpset?"#d97706":"#d1d5db",marginLeft:4}}>
-      {g.pct?`${g.pct}%`:""}{isUpset?" UPSET":""}
-    </span>
-  </div>);
-}
-
-function BracketView({bracket}){
-  if(!bracket)return null;
-  return(<div>
-    {REGIONS.map(rn=>{
-      const rnds=bracket.regions[rn]?.rounds; if(!rnds)return null;
-      const c=RC[rn];
-      return(<div key={rn} style={{marginBottom:24}}>
-        <h3 style={{color:c,fontSize:16,fontWeight:800,textTransform:"uppercase",letterSpacing:2,marginBottom:12,borderBottom:`2px solid ${c}22`,paddingBottom:6}}>{rn} Region</h3>
-        {rnds.map((rd,ri)=>(<div key={ri} style={{marginBottom:12}}>
-          <div style={{fontSize:11,color:"#6b7280",textTransform:"uppercase",letterSpacing:1,marginBottom:4,fontWeight:700}}>{rd.name}</div>
-          {rd.games.map((g,gi)=><GameRow key={gi} g={g}/>)}
-        </div>))}
-      </div>);
-    })}
-    {bracket.finalFour&&(<div style={{marginBottom:24}}>
-      <h3 style={{color:"#7c3aed",fontSize:16,fontWeight:800,textTransform:"uppercase",letterSpacing:2,marginBottom:12,borderBottom:"2px solid #7c3aed22",paddingBottom:6}}>Final Four & Championship</h3>
-      <GameRow g={bracket.finalFour.semi1}/><GameRow g={bracket.finalFour.semi2}/>
-      <div style={{marginTop:12,padding:12,background:"linear-gradient(135deg,#ede9fe,#ddd6fe)",borderRadius:8,textAlign:"center"}}>
-        <div style={{fontSize:10,color:"#7c3aed",textTransform:"uppercase",letterSpacing:2,marginBottom:4}}>National Champion</div>
-        <div style={{fontSize:22,fontWeight:900,color:"#111827"}}>({bracket.finalFour.final.winner.seed}) {bracket.finalFour.final.winner.name}</div>
-        <div style={{fontSize:11,color:"#7c3aed",marginTop:2}}>Win probability: {bracket.finalFour.final.pct}%</div>
+function MBox({g}){
+  if(!g||!g.a) return <div style={{width:128,height:36}}/>;
+  const aW=g.winner?.name===g.a?.name,bW=g.winner?.name===g.b?.name;
+  const upset=g.winner?.seed>(aW?g.b?.seed:g.a?.seed);
+  return(
+    <div style={{width:128,border:"1px solid "+(upset?"#f59e0b":"#d1d5db"),borderRadius:3,background:upset?"#fffbeb":"#fff",fontSize:10,overflow:"hidden",flexShrink:0}}>
+      <div style={{display:"flex",justifyContent:"space-between",padding:"2px 4px",borderBottom:"1px solid #f3f4f6",background:aW?"#eff6ff":"transparent"}}>
+        <span style={{color:aW?"#111":"#aaa",fontWeight:aW?700:400,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:90}}><span style={{color:"#9ca3af",marginRight:2}}>{g.a?.seed}</span>{g.a?.name}</span>
+        {aW&&<span style={{color:"#6b7280",fontSize:9}}>{g.pct}%</span>}
       </div>
-    </div>)}
+      <div style={{display:"flex",justifyContent:"space-between",padding:"2px 4px",background:bW?"#eff6ff":"transparent"}}>
+        <span style={{color:bW?"#111":"#aaa",fontWeight:bW?700:400,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:90}}><span style={{color:"#9ca3af",marginRight:2}}>{g.b?.seed}</span>{g.b?.name}</span>
+        {bW&&<span style={{color:"#6b7280",fontSize:9}}>{g.pct}%</span>}
+      </div>
+    </div>
+  );
+}
+
+function Conn({count}){return(<div style={{display:"flex",flexDirection:"column",width:12,flexShrink:0}}>{Array.from({length:count/2}).map((_,i)=>(<div key={i} style={{flex:1,display:"flex",flexDirection:"column"}}><div style={{flex:1,borderBottom:"1px solid #cbd5e1",borderRight:"1px solid #cbd5e1"}}/><div style={{flex:1,borderTop:"1px solid #cbd5e1",borderRight:"1px solid #cbd5e1"}}/></div>))}</div>);}
+function ConnIn({count}){return(<div style={{display:"flex",flexDirection:"column",width:8,flexShrink:0}}>{Array.from({length:count}).map((_,i)=>(<div key={i} style={{flex:1,display:"flex",alignItems:"center"}}><div style={{width:"100%",borderBottom:"1px solid #cbd5e1"}}/></div>))}</div>);}
+function ConnR({count}){return(<div style={{display:"flex",flexDirection:"column",width:12,flexShrink:0}}>{Array.from({length:count/2}).map((_,i)=>(<div key={i} style={{flex:1,display:"flex",flexDirection:"column"}}><div style={{flex:1,borderBottom:"1px solid #cbd5e1",borderLeft:"1px solid #cbd5e1"}}/><div style={{flex:1,borderTop:"1px solid #cbd5e1",borderLeft:"1px solid #cbd5e1"}}/></div>))}</div>);}
+function ConnInR({count}){return(<div style={{display:"flex",flexDirection:"column",width:8,flexShrink:0}}>{Array.from({length:count}).map((_,i)=>(<div key={i} style={{flex:1,display:"flex",alignItems:"center"}}><div style={{width:"100%",borderBottom:"1px solid #cbd5e1"}}/></div>))}</div>);}
+
+function RCol({games}){return(<div style={{display:"flex",flexDirection:"column",flexShrink:0}}>{games.map((g,i)=>(<div key={i} style={{flex:1,display:"flex",alignItems:"center",padding:"1px 0"}}><MBox g={g}/></div>))}</div>);}
+
+function RegLTR({rounds,label,color}){if(!rounds)return null;return(<div style={{flex:1,display:"flex",flexDirection:"column",minWidth:0}}><div style={{fontSize:10,fontWeight:800,color,textTransform:"uppercase",letterSpacing:1,padding:"2px 4px",marginBottom:2}}>{label}</div><div style={{flex:1,display:"flex",alignItems:"stretch"}}><RCol games={rounds[0].games}/><Conn count={8}/><ConnIn count={4}/><RCol games={rounds[1].games}/><Conn count={4}/><ConnIn count={2}/><RCol games={rounds[2].games}/><Conn count={2}/><ConnIn count={1}/><RCol games={rounds[3].games}/></div></div>);}
+function RegRTL({rounds,label,color}){if(!rounds)return null;return(<div style={{flex:1,display:"flex",flexDirection:"column",minWidth:0}}><div style={{fontSize:10,fontWeight:800,color,textTransform:"uppercase",letterSpacing:1,padding:"2px 4px",marginBottom:2,textAlign:"right"}}>{label}</div><div style={{flex:1,display:"flex",alignItems:"stretch"}}><RCol games={rounds[3].games}/><ConnR count={2}/><ConnInR count={2}/><RCol games={rounds[2].games}/><ConnR count={4}/><ConnInR count={4}/><RCol games={rounds[1].games}/><ConnR count={8}/><ConnInR count={8}/><RCol games={rounds[0].games}/></div></div>);}
+
+function FullBracket({bracket}){
+  if(!bracket)return null;
+  const ff=bracket.finalFour;
+  return(
+    <div style={{flex:1,overflow:"auto",padding:"6px 10px",display:"flex",flexDirection:"column"}}>
+      {/* Top: East (LTR) | FF center | West (RTL) */}
+      <div style={{display:"flex",alignItems:"stretch",flex:1,minHeight:330}}>
+        <RegLTR rounds={bracket.regions.East?.rounds} label="East" color={RC.East}/>
+        {/* Center column for FF */}
+        <div style={{width:140,flexShrink:0,display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",gap:4,padding:"0 4px"}}>
+          <div style={{fontSize:9,color:"#7c3aed",textTransform:"uppercase",letterSpacing:1,fontWeight:800}}>Final Four</div>
+          <MBox g={ff.semi1}/>
+          <div style={{margin:"4px 0",padding:8,background:"linear-gradient(135deg,#ede9fe,#ddd6fe)",borderRadius:6,textAlign:"center",width:"100%"}}>
+            <div style={{fontSize:8,color:"#7c3aed",textTransform:"uppercase",letterSpacing:1,fontWeight:700}}>Champion</div>
+            <div style={{fontSize:14,fontWeight:900,color:"#111"}}>{ff.final.winner?.name}</div>
+            <div style={{fontSize:9,color:"#7c3aed"}}>({ff.final.winner?.seed}) {ff.final.pct}%</div>
+          </div>
+          <MBox g={ff.semi2}/>
+        </div>
+        <RegRTL rounds={bracket.regions.West?.rounds} label="West" color={RC.West}/>
+      </div>
+      <div style={{height:1,background:"#e5e7eb",margin:"4px 0",flexShrink:0}}/>
+      {/* Bottom: South (LTR) | spacer | Midwest (RTL) */}
+      <div style={{display:"flex",alignItems:"stretch",flex:1,minHeight:330}}>
+        <RegLTR rounds={bracket.regions.South?.rounds} label="South" color={RC.South}/>
+        <div style={{width:140,flexShrink:0}}/>
+        <RegRTL rounds={bracket.regions.Midwest?.rounds} label="Midwest" color={RC.Midwest}/>
+      </div>
+    </div>
+  );
+}
+
+function Leaderboard({data}){
+  if(!data)return null;
+  const h={padding:"4px 3px",fontSize:9,color:"#6b7280",textTransform:"uppercase",letterSpacing:1,borderBottom:"1px solid #e5e7eb",fontWeight:700};
+  const c={padding:"3px",borderBottom:"1px solid #f3f4f6",color:"#4b5563",fontSize:11};
+  return(<div style={{padding:"8px 12px",overflow:"auto",flex:1}}>
+    <div style={{display:"grid",gridTemplateColumns:"auto 30px 68px 55px 55px 55px 55px 38px",gap:0}}>
+      <div style={h}>Team</div><div style={h}>Sd</div><div style={{...h,paddingLeft:4}}>Region</div>
+      <div style={{...h,textAlign:"right"}}>Chmp%</div><div style={{...h,textAlign:"right"}}>F4%</div>
+      <div style={{...h,textAlign:"right"}}>E8%</div><div style={{...h,textAlign:"right"}}>S16%</div>
+      <div style={{...h,textAlign:"right"}}>KP</div>
+      {data.slice(0,25).map((t,i)=>[
+        <div key={`n${i}`} style={{...c,fontWeight:700,color:t.champProfile?"#b45309":"#111",display:"flex",alignItems:"center",gap:3}}><span style={{color:"#ccc",fontSize:9,width:14,textAlign:"right"}}>{i+1}</span>{t.name}{t.champProfile&&<span style={{fontSize:7,background:"#fef3c7",color:"#b45309",padding:"0 3px",borderRadius:2}}>CP</span>}</div>,
+        <div key={`s${i}`} style={c}>{t.seed}</div>,
+        <div key={`r${i}`} style={{...c,paddingLeft:4}}><span style={{display:"inline-block",width:6,height:6,borderRadius:1,background:RC[t.region],marginRight:4}}/>{t.region}</div>,
+        <div key={`c${i}`} style={{...c,textAlign:"right",fontWeight:800,color:+t.champPct>10?"#1d4ed8":+t.champPct>5?"#2563eb":"#4b5563"}}>{t.champPct}%</div>,
+        <div key={`f${i}`} style={{...c,textAlign:"right"}}>{t.f4Pct}%</div>,
+        <div key={`e${i}`} style={{...c,textAlign:"right",color:"#6b7280"}}>{t.e8Pct}%</div>,
+        <div key={`s16${i}`} style={{...c,textAlign:"right",color:"#9ca3af"}}>{t.s16Pct}%</div>,
+        <div key={`k${i}`} style={{...c,textAlign:"right",color:"#9ca3af"}}>#{t.kpRank}</div>,
+      ])}
+    </div>
   </div>);
 }
 
 function App(){
   const[w,setW]=useState(DEFAULT_W);
-  const[leaderboard,setLeaderboard]=useState(null);
+  const[lb,setLb]=useState(null);
   const[chalk,setChalk]=useState(null);
   const[upside,setUpside]=useState(null);
   const[chaos,setChaos]=useState(null);
-  const[tab,setTab]=useState("leaderboard");
+  const[tab,setTab]=useState("upside");
   const[running,setRunning]=useState(false);
   const[spg,setSpg]=useState(1000);
   const[lbN,setLbN]=useState(1000);
   const up=useCallback((k,v)=>setW(p=>({...p,[k]:v})),[]);
+  const run=useCallback(()=>{setRunning(true);setTimeout(()=>{setLb(runLeaderboard(w,lbN));setChalk(generateBracket(w,spg,"chalk"));setUpside(generateBracket(w,spg,"upside"));setChaos(generateBracket(w,spg,"chaos"));setRunning(false);},50);},[w,spg,lbN]);
+  const tabs=[{id:"chalk",label:"Chalk",d:"Favorite wins every game"},{id:"upside",label:"Upside",d:"Smart upsets via historical true-up"},{id:"chaos",label:"Chaos",d:"Weighted dice roll each game"},{id:"leaderboard",label:"Stats",d:"Championship probability rankings"}];
+  const active=tab==="chalk"?chalk:tab==="upside"?upside:tab==="chaos"?chaos:null;
 
-  const run=useCallback(()=>{
-    setRunning(true);
-    setTimeout(()=>{
-      setLeaderboard(runLeaderboard(w,lbN));
-      setChalk(generateBracket(w,spg,"chalk"));
-      setUpside(generateBracket(w,spg,"upside"));
-      setChaos(generateBracket(w,spg,"chaos"));
-      setRunning(false);setTab("leaderboard");
-    },50);
-  },[w,spg,lbN]);
-
-  const tabs=[{id:"leaderboard",label:"Leaderboard"},{id:"chalk",label:"Chalk"},{id:"upside",label:"Upside"},{id:"chaos",label:"Chaos"}];
-  const hdr={padding:"6px 4px",fontSize:10,color:"#6b7280",textTransform:"uppercase",letterSpacing:1,borderBottom:"1px solid #e5e7eb",fontWeight:700};
-  const cell={padding:"5px 4px",borderBottom:"1px solid #f3f4f6",color:"#4b5563"};
-
-  return(<div style={{fontFamily:"'Segoe UI',Tahoma,Geneva,Verdana,sans-serif",background:"#ffffff",color:"#111827",minHeight:"100vh"}}>
-    <div style={{background:"linear-gradient(135deg,#1e3a5f,#1e40af)",borderBottom:"1px solid #e5e7eb",padding:"16px 20px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-      <div>
-        <div style={{display:"flex",alignItems:"center",gap:12}}>
-          <div style={{fontSize:28,fontWeight:900,letterSpacing:-1}}>
-            <span style={{color:"#93c5fd"}}>MARCH</span> <span style={{color:"#fbbf24"}}>MADNESS</span>
+  return(
+    <div style={{display:"flex",justifyContent:"center",alignItems:"center",minHeight:"100vh",background:"#e5e7eb",fontFamily:"'Segoe UI',Tahoma,sans-serif",padding:8}}>
+      {/* Picture frame */}
+      <div style={{display:"flex",width:"100%",maxWidth:1600,height:"calc(100vh - 16px)",maxHeight:900,background:"#fff",borderRadius:8,boxShadow:"0 4px 24px rgba(0,0,0,.12)",overflow:"hidden",border:"1px solid #d1d5db"}}>
+        {/* Sidebar */}
+        <div style={{width:240,background:"#f9fafb",borderRight:"1px solid #e5e7eb",display:"flex",flexDirection:"column",flexShrink:0,overflow:"hidden"}}>
+          <div style={{background:"linear-gradient(135deg,#1e3a5f,#1e40af)",padding:"10px 12px",flexShrink:0}}>
+            <div style={{fontSize:18,fontWeight:900,letterSpacing:-.5}}><span style={{color:"#93c5fd"}}>MARCH</span> <span style={{color:"#fbbf24"}}>MADNESS</span></div>
+            <div style={{fontSize:9,color:"#93c5fd",textTransform:"uppercase",letterSpacing:1.5}}>Monte Carlo Simulator 2026</div>
           </div>
-          <div style={{fontSize:11,color:"#93c5fd",textTransform:"uppercase",letterSpacing:2}}>Monte Carlo Bracket Simulator</div>
+          <div style={{padding:"8px 12px",borderBottom:"1px solid #e5e7eb",flexShrink:0}}>
+            <button onClick={run} disabled={running} style={{width:"100%",padding:"7px",background:running?"#d1d5db":"linear-gradient(135deg,#2563eb,#1d4ed8)",color:running?"#6b7280":"#fff",border:"none",borderRadius:5,fontWeight:800,fontSize:11,cursor:running?"wait":"pointer",textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>{running?"Simulating...":"Run Simulation"}</button>
+            <div style={{display:"flex",gap:6}}>
+              <div style={{flex:1}}><div style={{fontSize:8,color:"#6b7280",marginBottom:1}}>Sims/Game</div><select value={spg} onChange={e=>setSpg(+e.target.value)} style={{width:"100%",padding:"3px",background:"#fff",border:"1px solid #d1d5db",borderRadius:3,fontSize:10}}><option value={100}>100</option><option value={500}>500</option><option value={1000}>1K</option><option value={2000}>2K</option></select></div>
+              <div style={{flex:1}}><div style={{fontSize:8,color:"#6b7280",marginBottom:1}}>LB Runs</div><select value={lbN} onChange={e=>setLbN(+e.target.value)} style={{width:"100%",padding:"3px",background:"#fff",border:"1px solid #d1d5db",borderRadius:3,fontSize:10}}><option value={500}>500</option><option value={1000}>1K</option><option value={2000}>2K</option></select></div>
+            </div>
+          </div>
+          <div style={{flex:1,overflowY:"auto",padding:"8px 12px",fontSize:11}}>
+            <div style={{fontSize:9,color:"#2563eb",textTransform:"uppercase",letterSpacing:1.5,fontWeight:800,marginBottom:4}}>Power</div>
+            <Sl label="Offense" value={w.offense} onChange={v=>up("offense",v)} desc="KenPom adjusted offensive efficiency weight"/>
+            <Sl label="Defense" value={w.defense} onChange={v=>up("defense",v)} desc="KenPom adjusted defensive efficiency weight"/>
+            <Sl label="Overall (AdjEM)" value={w.overall} onChange={v=>up("overall",v)} desc="Combined efficiency margin + strength of schedule"/>
+            <div style={{fontSize:9,color:"#d97706",textTransform:"uppercase",letterSpacing:1.5,fontWeight:800,marginBottom:4,marginTop:6}}>Volatility</div>
+            <Sl label="Tempo Mismatch" value={w.tempo} onChange={v=>up("tempo",v)} desc="Pace mismatch increases randomness"/>
+            <Sl label="3PT Variance" value={w.threePt} onChange={v=>up("threePt",v)} desc="Three-point teams swing hot/cold"/>
+            <Sl label="Chaos" value={w.chaos} onChange={v=>up("chaos",v)} desc="Pure randomness. Keep above 2"/>
+            <div style={{fontSize:9,color:"#7c3aed",textTransform:"uppercase",letterSpacing:1.5,fontWeight:800,marginBottom:4,marginTop:6}}>Tournament</div>
+            <Sl label="Experience" value={w.experience} onChange={v=>up("experience",v)} desc="Upperclassman bonus, scales in later rounds"/>
+            <Sl label="Def. Suppression" value={w.defSuppression} onChange={v=>up("defSuppression",v)} desc="Elite D reduces opponent offense"/>
+            <Sl label="Champ Profile" value={w.champBonus} onChange={v=>up("champBonus",v)} desc="Bonus for top-21 O + top-31 D teams"/>
+            <Sl label="Home Court" value={w.homeCourt} onChange={v=>up("homeCourt",v)} desc="Boost for teams playing near home in R64/R32. Missouri (St. Louis), USF (Tampa), Villanova (Philly), etc."/>
+            <div style={{marginTop:8,paddingTop:8,borderTop:"1px solid #e5e7eb",fontSize:9,color:"#6b7280",lineHeight:1.4}}>
+              <div style={{fontWeight:700,marginBottom:4,textTransform:"uppercase",letterSpacing:1,color:"#374151"}}>Glossary</div>
+              <p style={{marginBottom:3}}><b style={{color:"#2563eb"}}>Chalk:</b> Favorite always wins. Small pools.</p>
+              <p style={{marginBottom:3}}><b style={{color:"#d97706"}}>Upside:</b> Historical true-up flips best underdogs each round.</p>
+              <p style={{marginBottom:3}}><b style={{color:"#dc2626"}}>Chaos:</b> Weighted dice roll. Different every run.</p>
+              <p style={{marginBottom:3}}><b style={{color:"#b45309"}}>CP:</b> Championship Profile (top-21 O + top-31 D).</p>
+              <p style={{marginBottom:3}}><b>KP:</b> KenPom overall rank. <b>UPSET:</b> Higher seed won.</p>
+              <p style={{marginBottom:3}}><b>Sims/Game:</b> Times each matchup is played.</p>
+              <p style={{marginBottom:0}}><b>LB Runs:</b> Full tournaments for championship odds.</p>
+            </div>
+          </div>
         </div>
-        <div style={{fontSize:11,color:"#bfdbfe",marginTop:4}}>2026 NCAA Tournament - 68 Teams - KenPom Powered - {spg.toLocaleString()} sims/game</div>
+        {/* Main */}
+        <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden",background:"#fff"}}>
+          <div style={{display:"flex",borderBottom:"1px solid #e5e7eb",flexShrink:0,background:"#fafafa"}}>
+            {tabs.map(t=>(<button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"6px 14px",background:"transparent",border:"none",borderBottom:tab===t.id?"2px solid #2563eb":"2px solid transparent",color:tab===t.id?"#2563eb":"#9ca3af",fontWeight:700,fontSize:11,cursor:"pointer",textTransform:"uppercase",letterSpacing:1,display:"flex",flexDirection:"column",alignItems:"center"}}><span>{t.label}</span><span style={{fontSize:8,fontWeight:400,color:tab===t.id?"#60a5fa":"#ccc",textTransform:"none"}}>{t.d}</span></button>))}
+          </div>
+          {!chalk&&(<div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",color:"#9ca3af"}}><div style={{fontSize:48,marginBottom:12}}>🏀</div><div style={{fontSize:14}}>Adjust weights and hit Run</div></div>)}
+          {tab==="leaderboard"&&lb&&<Leaderboard data={lb}/>}
+          {tab!=="leaderboard"&&active&&<FullBracket bracket={active}/>}
+        </div>
       </div>
-      <img src="data:image/jpeg;base64,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" alt="Thought Logic" style={{height:50,borderRadius:4,background:"#ffffff",padding:4}}/>
     </div>
-
-    <div style={{maxWidth:1200,margin:"0 auto"}}>
-      <div style={{padding:"16px 20px",background:"#f9fafb",borderBottom:"1px solid #e5e7eb"}}>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:16,marginBottom:12}}>
-          <div>
-            <div style={{fontSize:10,color:"#2563eb",textTransform:"uppercase",letterSpacing:2,marginBottom:8,fontWeight:800}}>Power Weights</div>
-            <Slider label="Offensive Power" value={w.offense} onChange={v=>up("offense",v)} desc="How much a team's KenPom adjusted offensive efficiency (points per 100 possessions) influences their game score. Higher = elite offenses dominate."/>
-            <Slider label="Defensive Power" value={w.defense} onChange={v=>up("defense",v)} desc="How much a team's KenPom adjusted defensive efficiency influences their game score. Higher = shutdown defenses get rewarded more."/>
-            <Slider label="Overall Strength (AdjEM)" value={w.overall} onChange={v=>up("overall",v)} desc="Weight given to KenPom's overall efficiency margin ranking, which combines offense + defense + strength of schedule into one number."/>
-          </div>
-          <div>
-            <div style={{fontSize:10,color:"#d97706",textTransform:"uppercase",letterSpacing:2,marginBottom:8,fontWeight:800}}>Volatility Factors</div>
-            <Slider label="Tempo Mismatch Impact" value={w.tempo} onChange={v=>up("tempo",v)} desc="How much a pace mismatch (fast team vs slow team) increases game-to-game randomness. High tempo gaps create more chaotic, unpredictable outcomes."/>
-            <Slider label="3PT Variance" value={w.threePt} onChange={v=>up("threePt",v)} desc="How much three-point dependent teams swing between hot and cold. Teams that live by the three have higher ceilings but lower floors."/>
-            <Slider label="Chaos Factor" value={w.chaos} onChange={v=>up("chaos",v)} desc="Pure randomness injected into every game. At 0, the better team almost always wins. At 10, anything can happen. This is March Madness - keep it above 2."/>
-          </div>
-          <div>
-            <div style={{fontSize:10,color:"#7c3aed",textTransform:"uppercase",letterSpacing:2,marginBottom:8,fontWeight:800}}>Tournament Factors</div>
-            <Slider label="Experience / Composure" value={w.experience} onChange={v=>up("experience",v)} desc="Bonus for upperclassman-heavy rosters. Scales up in later rounds - barely matters in R64, significant by the Elite Eight and Final Four."/>
-            <Slider label="Def. Suppression" value={w.defSuppression} onChange={v=>up("defSuppression",v)} desc="How much an opponent's elite defense reduces your scoring output. Higher = elite defenses actively suppress the other team's offense in the sim."/>
-            <Slider label="Champion Profile Bonus" value={w.champBonus} onChange={v=>up("champBonus",v)} desc="Flat bonus for teams meeting the historical championship threshold (top 21 offense + top 31 defense). 23 of 24 recent champs cleared this bar."/>
-          </div>
-        </div>
-        <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
-          <button onClick={run} disabled={running}
-            style={{padding:"10px 28px",background:running?"#d1d5db":"linear-gradient(135deg,#2563eb,#1d4ed8)",color:running?"#6b7280":"#ffffff",border:"none",borderRadius:6,fontWeight:800,fontSize:14,cursor:running?"wait":"pointer",textTransform:"uppercase",letterSpacing:1}}>
-            {running?"Simulating...":"Run Simulation"}
-          </button>
-          <div style={{display:"flex",alignItems:"center",gap:6}}>
-            <label style={{fontSize:11,color:"#6b7280"}}>Sims/game:</label>
-            <select value={spg} onChange={e=>setSpg(Number(e.target.value))}
-              style={{padding:"6px 10px",background:"#ffffff",color:"#111827",border:"1px solid #d1d5db",borderRadius:6,fontSize:12}}>
-              <option value={100}>100</option><option value={500}>500</option>
-              <option value={1000}>1,000</option><option value={2000}>2,000</option>
-            </select>
-          </div>
-          <div style={{display:"flex",alignItems:"center",gap:6}}>
-            <label style={{fontSize:11,color:"#6b7280"}}>Leaderboard runs:</label>
-            <select value={lbN} onChange={e=>setLbN(Number(e.target.value))}
-              style={{padding:"6px 10px",background:"#ffffff",color:"#111827",border:"1px solid #d1d5db",borderRadius:6,fontSize:12}}>
-              <option value={500}>500</option><option value={1000}>1,000</option><option value={2000}>2,000</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {/* Legend */}
-      <div style={{padding:"12px 20px",background:"#f0f4ff",borderBottom:"1px solid #e5e7eb"}}>
-        <details>
-          <summary style={{fontSize:12,fontWeight:700,color:"#1e40af",cursor:"pointer",userSelect:"none"}}>
-            Guide & Glossary (click to expand)
-          </summary>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:16,marginTop:12,fontSize:11,color:"#374151",lineHeight:1.5}}>
-            <div>
-              <div style={{fontWeight:800,color:"#1e40af",textTransform:"uppercase",letterSpacing:1,fontSize:10,marginBottom:6}}>Simulation Settings</div>
-              <div style={{marginBottom:6}}><span style={{fontWeight:700}}>Sims/Game</span> - How many times each individual matchup is simulated (e.g. Duke vs Siena played 1,000 times). Higher = more stable win percentages but slower to run.</div>
-              <div style={{marginBottom:6}}><span style={{fontWeight:700}}>Leaderboard Runs</span> - How many complete 67-game tournaments are simulated to generate championship probability rankings. Each run uses 1 sim per game with weighted randomness to explore all possible paths.</div>
-            </div>
-            <div>
-              <div style={{fontWeight:800,color:"#1e40af",textTransform:"uppercase",letterSpacing:1,fontSize:10,marginBottom:6}}>Bracket Modes</div>
-              <div style={{marginBottom:6}}><span style={{fontWeight:700,color:"#2563eb"}}>Chalk</span> - The safest bracket. Every game goes to the team that won the majority of its simulations. No upsets are forced. Best for small pools where getting the most games right matters.</div>
-              <div style={{marginBottom:6}}><span style={{fontWeight:700,color:"#d97706"}}>Upside</span> - Starts with chalk, then applies a historical true-up after each round. History tells us roughly how many upsets happen per seed matchup (e.g. 1 of 4 twelve-seeds typically beats a 5-seed). The model picks the most plausible underdogs to flip. Best for medium/large pools where you need differentiation.</div>
-              <div style={{marginBottom:6}}><span style={{fontWeight:700,color:"#dc2626"}}>Chaos</span> - Each game is decided by a single weighted dice roll based on the sim probabilities. A team with a 70% win rate wins 70% of the time, but the 30% underdog can hit. Produces a different bracket every run. Best for a fun second or third entry.</div>
-            </div>
-            <div>
-              <div style={{fontWeight:800,color:"#1e40af",textTransform:"uppercase",letterSpacing:1,fontSize:10,marginBottom:6}}>Leaderboard Columns</div>
-              <div style={{marginBottom:6}}><span style={{fontWeight:700}}>Champ%</span> - Percentage of simulated tournaments where this team won the national championship.</div>
-              <div style={{marginBottom:6}}><span style={{fontWeight:700}}>F4%</span> - Percentage of sims where this team reached the Final Four.</div>
-              <div style={{marginBottom:6}}><span style={{fontWeight:700}}>E8%</span> - Percentage of sims where this team reached the Elite Eight.</div>
-              <div style={{marginBottom:6}}><span style={{fontWeight:700}}>S16%</span> - Percentage of sims where this team reached the Sweet 16.</div>
-              <div style={{marginBottom:6}}><span style={{fontWeight:700}}>KP</span> - KenPom overall ranking (adjusted efficiency margin). #1 is the best team in the country.</div>
-              <div style={{marginBottom:6}}><span style={{fontWeight:700,color:"#b45309"}}>CP</span> - Championship Profile. Teams ranked top 21 in offensive efficiency AND top 31 in defensive efficiency. 23 of 24 recent national champions met this threshold.</div>
-            </div>
-            <div>
-              <div style={{fontWeight:800,color:"#1e40af",textTransform:"uppercase",letterSpacing:1,fontSize:10,marginBottom:6}}>Bracket Labels</div>
-              <div style={{marginBottom:6}}><span style={{fontWeight:700}}>Win %</span> - Shown next to each game winner. For chalk/upside, this is the percentage of sims that team won. For chaos, it's the probability that was used for the dice roll.</div>
-              <div style={{marginBottom:6}}><span style={{fontWeight:700,color:"#d97706"}}>UPSET</span> - Any game where the higher-numbered seed (underdog) won, regardless of mode.</div>
-              <div style={{marginBottom:6}}><span style={{fontWeight:700}}>Seed (#)</span> - The team's NCAA tournament seed, 1-16. Lower number = higher seed = expected to be stronger.</div>
-            </div>
-            <div>
-              <div style={{fontWeight:800,color:"#1e40af",textTransform:"uppercase",letterSpacing:1,fontSize:10,marginBottom:6}}>How It Works</div>
-              <div style={{marginBottom:6}}>The simulator uses KenPom adjusted offensive efficiency, defensive efficiency, and overall efficiency margin rankings for all 68 tournament teams. Each game is simulated using a Monte Carlo method: team strength scores are computed, volatility is added based on tempo mismatch and three-point dependence, and a random factor determines the outcome. Winners are locked after each round and used as inputs for the next round's matchups.</div>
-              <div style={{marginBottom:6}}>The Upside bracket's historical true-up is based on actual NCAA tournament upset rates since 2001: 8v9 games split nearly 50/50, 5v12 upsets happen about 35% of the time, 4v13 about 21%, and so on.</div>
-            </div>
-          </div>
-        </details>
-      </div>
-
-      {leaderboard&&(<div style={{padding:"0 20px 20px"}}>
-        <div style={{display:"flex",gap:0,borderBottom:"1px solid #e5e7eb",marginBottom:16,paddingTop:12}}>
-          {tabs.map(t=>(
-            <button key={t.id} onClick={()=>setTab(t.id)}
-              style={{padding:"8px 16px",background:"transparent",border:"none",borderBottom:tab===t.id?"2px solid #2563eb":"2px solid transparent",color:tab===t.id?"#2563eb":"#9ca3af",fontWeight:700,fontSize:12,cursor:"pointer",textTransform:"uppercase",letterSpacing:1}}>
-              {t.label}
-            </button>
-          ))}
-        </div>
-
-        {tab==="leaderboard"&&(<div>
-          <div style={{fontSize:11,color:"#6b7280",marginBottom:8}}>{lbN.toLocaleString()} full tournament simulations (1 sim/game each = pure weighted randomness)</div>
-          <div style={{display:"grid",gridTemplateColumns:"auto 40px 1fr 65px 65px 65px 65px 55px",gap:0,fontSize:12}}>
-            <div style={hdr}>Team</div><div style={hdr}>Seed</div><div style={{...hdr,paddingLeft:8}}>Region</div>
-            <div style={{...hdr,textAlign:"right"}}>Champ%</div><div style={{...hdr,textAlign:"right"}}>F4%</div>
-            <div style={{...hdr,textAlign:"right"}}>E8%</div><div style={{...hdr,textAlign:"right"}}>S16%</div>
-            <div style={{...hdr,textAlign:"right"}}>KP</div>
-            {leaderboard.slice(0,30).map((t,i)=>[
-              <div key={`n${i}`} style={{...cell,fontWeight:700,color:t.champProfile?"#b45309":"#111827",display:"flex",alignItems:"center",gap:4}}>
-                <span style={{color:"#d1d5db",fontSize:10,width:18,textAlign:"right"}}>{i+1}.</span>
-                {t.name}
-                {t.champProfile&&<span style={{fontSize:8,background:"#fef3c7",color:"#b45309",padding:"1px 4px",borderRadius:3,border:"1px solid #fde68a"}}>CP</span>}
-              </div>,
-              <div key={`s${i}`} style={cell}>{t.seed}</div>,
-              <div key={`r${i}`} style={{...cell,paddingLeft:8}}>
-                <span style={{display:"inline-block",width:8,height:8,borderRadius:2,background:RC[t.region],marginRight:6}}/>{t.region}
-              </div>,
-              <div key={`c${i}`} style={{...cell,textAlign:"right",fontWeight:800,color:parseFloat(t.champPct)>10?"#1d4ed8":parseFloat(t.champPct)>5?"#2563eb":"#4b5563"}}>{t.champPct}%</div>,
-              <div key={`f${i}`} style={{...cell,textAlign:"right",color:"#4b5563"}}>{t.f4Pct}%</div>,
-              <div key={`e${i}`} style={{...cell,textAlign:"right",color:"#6b7280"}}>{t.e8Pct}%</div>,
-              <div key={`s16${i}`} style={{...cell,textAlign:"right",color:"#9ca3af"}}>{t.s16Pct}%</div>,
-              <div key={`k${i}`} style={{...cell,textAlign:"right",color:"#9ca3af"}}>#{t.kpRank}</div>,
-            ])}
-          </div>
-          <div style={{marginTop:8,fontSize:10,color:"#9ca3af"}}><span style={{color:"#b45309"}}>CP</span> = Championship Profile (Top 21 AdjO + Top 31 AdjD)</div>
-        </div>)}
-
-        {tab==="chalk"&&(<div>
-          <div style={{fontSize:11,color:"#6b7280",marginBottom:12}}>Every game simmed {spg.toLocaleString()} times. Favorite always wins. No true-up.</div>
-          <BracketView bracket={chalk}/>
-        </div>)}
-
-        {tab==="upside"&&(<div>
-          <div style={{fontSize:11,color:"#6b7280",marginBottom:12}}>
-            Every game simmed {spg.toLocaleString()} times. After each round, historical true-up flips the best underdogs to match real upset rates.
-            R64: ~{Object.values(R64_UPSETS).reduce((a,b)=>a+b,0)} upsets by seed tier. R32: ~{LATER_UPSETS[2]} upsets. S16: ~{LATER_UPSETS[3]} upset.
-          </div>
-          <BracketView bracket={upside}/>
-        </div>)}
-
-        {tab==="chaos"&&(<div>
-          <div style={{fontSize:11,color:"#6b7280",marginBottom:12}}>Every game simmed {spg.toLocaleString()} times for probabilities, then a single dice roll decides each winner. Re-run for a new bracket.</div>
-          <BracketView bracket={chaos}/>
-        </div>)}
-      </div>)}
-
-      {!leaderboard&&(<div style={{padding:40,textAlign:"center"}}>
-        <div style={{fontSize:48,marginBottom:16}}>🏀</div>
-        <div style={{fontSize:16,color:"#6b7280",marginBottom:8}}>Adjust weights and hit Run</div>
-        <div style={{fontSize:12,color:"#9ca3af"}}>
-          Each matchup simmed individually ({spg.toLocaleString()} times). Winners locked round by round.
-          Upside bracket applies historical upset rates after each round.
-        </div>
-      </div>)}
-    </div>
-  </div>);
+  );
 }
 
 ReactDOM.render(<App/>, document.getElementById('root'));
