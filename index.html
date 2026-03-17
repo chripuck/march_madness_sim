@@ -145,8 +145,21 @@ const RC={East:"#dc2626",West:"#2563eb",Midwest:"#16a34a",South:"#d97706"};
 
 function Sl({label,value,onChange,desc}){return(<div style={{marginBottom:10}}><div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"#374151"}}><span style={{fontWeight:600}}>{label}</span><span style={{fontWeight:700}}>{value}</span></div>{desc&&<div style={{fontSize:9,color:"#9ca3af",lineHeight:1.2,marginBottom:2}}>{desc}</div>}<input type="range" min={0} max={10} step={1} value={value} onChange={e=>onChange(+e.target.value)} style={{width:"100%",accentColor:"#2563eb",height:3,cursor:"pointer"}}/></div>);}
 
-function MBox({g}){
-  if(!g||!g.a) return <div style={{width:138,height:38}}/>;
+// Old MBox removed - replaced by MBox9
+
+function Conn({count}){return(<div style={{display:"flex",flexDirection:"column",width:12,flexShrink:0}}>{Array.from({length:count/2}).map((_,i)=>(<div key={i} style={{flex:1,display:"flex",flexDirection:"column"}}><div style={{flex:1,borderBottom:"1px solid #cbd5e1",borderRight:"1px solid #cbd5e1"}}/><div style={{flex:1,borderTop:"1px solid #cbd5e1",borderRight:"1px solid #cbd5e1"}}/></div>))}</div>);}
+function ConnIn({count}){return(<div style={{display:"flex",flexDirection:"column",width:8,flexShrink:0}}>{Array.from({length:count}).map((_,i)=>(<div key={i} style={{flex:1,display:"flex",alignItems:"center"}}><div style={{width:"100%",borderBottom:"1px solid #cbd5e1"}}/></div>))}</div>);}
+function ConnR({count}){return(<div style={{display:"flex",flexDirection:"column",width:12,flexShrink:0}}>{Array.from({length:count/2}).map((_,i)=>(<div key={i} style={{flex:1,display:"flex",flexDirection:"column"}}><div style={{flex:1,borderBottom:"1px solid #cbd5e1",borderLeft:"1px solid #cbd5e1"}}/><div style={{flex:1,borderTop:"1px solid #cbd5e1",borderLeft:"1px solid #cbd5e1"}}/></div>))}</div>);}
+function ConnInR({count}){return(<div style={{display:"flex",flexDirection:"column",width:8,flexShrink:0}}>{Array.from({length:count}).map((_,i)=>(<div key={i} style={{flex:1,display:"flex",alignItems:"center"}}><div style={{width:"100%",borderBottom:"1px solid #cbd5e1"}}/></div>))}</div>);}
+
+// Old RCol removed - replaced by RCol9
+
+// Old region components removed - replaced by HalfBracket
+
+function RCol9({games}){return(<div style={{display:"flex",flexDirection:"column",flex:1,minWidth:0}}>{games.map((g,i)=>(<div key={i} style={{flex:1,display:"flex",alignItems:"center",padding:"1px 2px"}}><MBox9 g={g}/></div>))}</div>);}
+
+function MBox9({g}){
+  if(!g||!g.a) return <div style={{width:"100%",height:38}}/>;
   const aW=g.winner?.name===g.a?.name,bW=g.winner?.name===g.b?.name;
   const upset=g.winner?.seed>(aW?g.b?.seed:g.a?.seed);
   const TeamRow=({t,won,pct})=>{
@@ -164,7 +177,7 @@ function MBox({g}){
     );
   };
   return(
-    <div style={{width:138,border:"1px solid "+(upset?"#f59e0b":"#d1d5db"),borderRadius:3,background:upset?"#fffbeb":"#fff",overflow:"hidden",flexShrink:0}}>
+    <div style={{width:"100%",border:"1px solid "+(upset?"#f59e0b":"#d1d5db"),borderRadius:3,background:upset?"#fffbeb":"#fff",overflow:"hidden"}}>
       <TeamRow t={g.a} won={aW} pct={aW?g.pct:null}/>
       <div style={{height:1,background:"#f3f4f6"}}/>
       <TeamRow t={g.b} won={bW} pct={bW?g.pct:null}/>
@@ -172,43 +185,74 @@ function MBox({g}){
   );
 }
 
-function Conn({count}){return(<div style={{display:"flex",flexDirection:"column",width:12,flexShrink:0}}>{Array.from({length:count/2}).map((_,i)=>(<div key={i} style={{flex:1,display:"flex",flexDirection:"column"}}><div style={{flex:1,borderBottom:"1px solid #cbd5e1",borderRight:"1px solid #cbd5e1"}}/><div style={{flex:1,borderTop:"1px solid #cbd5e1",borderRight:"1px solid #cbd5e1"}}/></div>))}</div>);}
-function ConnIn({count}){return(<div style={{display:"flex",flexDirection:"column",width:8,flexShrink:0}}>{Array.from({length:count}).map((_,i)=>(<div key={i} style={{flex:1,display:"flex",alignItems:"center"}}><div style={{width:"100%",borderBottom:"1px solid #cbd5e1"}}/></div>))}</div>);}
-function ConnR({count}){return(<div style={{display:"flex",flexDirection:"column",width:12,flexShrink:0}}>{Array.from({length:count/2}).map((_,i)=>(<div key={i} style={{flex:1,display:"flex",flexDirection:"column"}}><div style={{flex:1,borderBottom:"1px solid #cbd5e1",borderLeft:"1px solid #cbd5e1"}}/><div style={{flex:1,borderTop:"1px solid #cbd5e1",borderLeft:"1px solid #cbd5e1"}}/></div>))}</div>);}
-function ConnInR({count}){return(<div style={{display:"flex",flexDirection:"column",width:8,flexShrink:0}}>{Array.from({length:count}).map((_,i)=>(<div key={i} style={{flex:1,display:"flex",alignItems:"center"}}><div style={{width:"100%",borderBottom:"1px solid #cbd5e1"}}/></div>))}</div>);}
-
-function RCol({games}){return(<div style={{display:"flex",flexDirection:"column",flexShrink:0}}>{games.map((g,i)=>(<div key={i} style={{flex:1,display:"flex",alignItems:"center",padding:"1px 0"}}><MBox g={g}/></div>))}</div>);}
-
-function RegLTR({rounds,label,color}){if(!rounds)return null;return(<div style={{flex:1,display:"flex",flexDirection:"column",minWidth:0}}><div style={{fontSize:10,fontWeight:800,color,textTransform:"uppercase",letterSpacing:1,padding:"2px 4px",marginBottom:2}}>{label}</div><div style={{flex:1,display:"flex",alignItems:"stretch"}}><RCol games={rounds[0].games}/><Conn count={8}/><ConnIn count={4}/><RCol games={rounds[1].games}/><Conn count={4}/><ConnIn count={2}/><RCol games={rounds[2].games}/><Conn count={2}/><ConnIn count={1}/><RCol games={rounds[3].games}/></div></div>);}
-function RegRTL({rounds,label,color}){if(!rounds)return null;return(<div style={{flex:1,display:"flex",flexDirection:"column",minWidth:0}}><div style={{fontSize:10,fontWeight:800,color,textTransform:"uppercase",letterSpacing:1,padding:"2px 4px",marginBottom:2,textAlign:"right"}}>{label}</div><div style={{flex:1,display:"flex",alignItems:"stretch"}}><RCol games={rounds[3].games}/><ConnR count={2}/><ConnInR count={2}/><RCol games={rounds[2].games}/><ConnR count={4}/><ConnInR count={4}/><RCol games={rounds[1].games}/><ConnR count={8}/><ConnInR count={8}/><RCol games={rounds[0].games}/></div></div>);}
+function HalfBracket({leftRounds,rightRounds,leftLabel,rightLabel,leftColor,rightColor}){
+  if(!leftRounds||!rightRounds) return null;
+  return(
+    <div style={{flex:1,display:"flex",minHeight:330}}>
+      {/* Left region: R64 -> R32 -> S16 -> E8 */}
+      <div style={{flex:1,display:"flex",flexDirection:"column",minWidth:0}}>
+        <div style={{fontSize:14,fontWeight:900,color:leftColor,textTransform:"uppercase",letterSpacing:2,padding:"2px 4px"}}>{leftLabel}</div>
+        <div style={{flex:1,display:"flex",alignItems:"stretch"}}>
+          <RCol9 games={leftRounds[0].games}/>
+          <Conn count={8}/><ConnIn count={4}/>
+          <RCol9 games={leftRounds[1].games}/>
+          <Conn count={4}/><ConnIn count={2}/>
+          <RCol9 games={leftRounds[2].games}/>
+          <Conn count={2}/><ConnIn count={1}/>
+          <RCol9 games={leftRounds[3].games}/>
+        </div>
+      </div>
+      {/* Spacer for center column alignment */}
+      <div style={{width:170,flexShrink:0}}/>
+      {/* Right region: E8 <- S16 <- R32 <- R64 */}
+      <div style={{flex:1,display:"flex",flexDirection:"column",minWidth:0}}>
+        <div style={{fontSize:14,fontWeight:900,color:rightColor,textTransform:"uppercase",letterSpacing:2,padding:"2px 4px",textAlign:"right"}}>{rightLabel}</div>
+        <div style={{flex:1,display:"flex",alignItems:"stretch"}}>
+          <RCol9 games={rightRounds[3].games}/>
+          <ConnR count={2}/><ConnInR count={2}/>
+          <RCol9 games={rightRounds[2].games}/>
+          <ConnR count={4}/><ConnInR count={4}/>
+          <RCol9 games={rightRounds[1].games}/>
+          <ConnR count={8}/><ConnInR count={8}/>
+          <RCol9 games={rightRounds[0].games}/>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function FullBracket({bracket}){
   if(!bracket)return null;
   const ff=bracket.finalFour;
+  const champLogo=logoUrl(ff.final.winner?.name);
   return(
-    <div style={{flex:1,overflow:"auto",padding:"6px 10px",display:"flex",flexDirection:"column"}}>
-      {/* Top: East (LTR) | FF center | West (RTL) */}
-      <div style={{display:"flex",alignItems:"stretch",flex:1,minHeight:330}}>
-        <RegLTR rounds={bracket.regions.East?.rounds} label="East" color={RC.East}/>
-        {/* Center column for FF */}
-        <div style={{width:140,flexShrink:0,display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",gap:4,padding:"0 4px"}}>
-          <div style={{fontSize:9,color:"#7c3aed",textTransform:"uppercase",letterSpacing:1,fontWeight:800}}>Final Four</div>
-          <MBox g={ff.semi1}/>
-          <div style={{margin:"4px 0",padding:8,background:"linear-gradient(135deg,#ede9fe,#ddd6fe)",borderRadius:6,textAlign:"center",width:"100%"}}>
-            <div style={{fontSize:8,color:"#7c3aed",textTransform:"uppercase",letterSpacing:1,fontWeight:700}}>Champion</div>
-            <div style={{fontSize:14,fontWeight:900,color:"#111"}}>{ff.final.winner?.name}</div>
-            <div style={{fontSize:9,color:"#7c3aed"}}>({ff.final.winner?.seed}) {ff.final.pct}%</div>
+    <div style={{flex:1,overflow:"auto",padding:"6px 10px",display:"flex",flexDirection:"column",position:"relative"}}>
+      {/* Top half */}
+      <HalfBracket
+        leftRounds={bracket.regions.East?.rounds} leftLabel="East" leftColor={RC.East}
+        rightRounds={bracket.regions.West?.rounds} rightLabel="West" rightColor={RC.West}
+      />
+      <div style={{height:1,background:"#e5e7eb",margin:"2px 0",flexShrink:0}}/>
+      {/* Bottom half */}
+      <HalfBracket
+        leftRounds={bracket.regions.South?.rounds} leftLabel="South" leftColor={RC.South}
+        rightRounds={bracket.regions.Midwest?.rounds} rightLabel="Midwest" rightColor={RC.Midwest}
+      />
+      {/* FF overlay centered */}
+      <div style={{position:"absolute",top:0,bottom:0,left:"50%",transform:"translateX(-50%)",width:170,display:"flex",alignItems:"center",pointerEvents:"none"}}>
+        <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:6,width:"100%",pointerEvents:"auto",padding:"0 4px"}}>
+          <div style={{fontSize:11,color:"#7c3aed",textTransform:"uppercase",letterSpacing:2,fontWeight:900}}>Final Four</div>
+          <MBox9 g={ff.semi1}/>
+          <div style={{fontSize:8,color:"#9ca3af",textAlign:"center"}}>East / West</div>
+          <div style={{padding:12,background:"linear-gradient(135deg,#ede9fe,#ddd6fe)",borderRadius:8,textAlign:"center",width:"100%",border:"2px solid #c4b5fd",boxShadow:"0 2px 12px rgba(124,58,237,.15)"}}>
+            <div style={{fontSize:9,color:"#7c3aed",textTransform:"uppercase",letterSpacing:2,fontWeight:700,marginBottom:4}}>Champion</div>
+            {champLogo&&<img src={champLogo} alt="" style={{width:44,height:44,objectFit:"contain",display:"block",margin:"0 auto 4px"}} onError={e=>{e.target.style.display='none'}}/>}
+            <div style={{fontSize:20,fontWeight:900,color:"#111"}}>{ff.final.winner?.name}</div>
+            <div style={{fontSize:11,color:"#7c3aed",marginTop:2}}>({ff.final.winner?.seed}) {ff.final.pct}%</div>
           </div>
-          <MBox g={ff.semi2}/>
+          <div style={{fontSize:8,color:"#9ca3af",textAlign:"center"}}>South / Midwest</div>
+          <MBox9 g={ff.semi2}/>
         </div>
-        <RegRTL rounds={bracket.regions.West?.rounds} label="West" color={RC.West}/>
-      </div>
-      <div style={{height:1,background:"#e5e7eb",margin:"4px 0",flexShrink:0}}/>
-      {/* Bottom: South (LTR) | spacer | Midwest (RTL) */}
-      <div style={{display:"flex",alignItems:"stretch",flex:1,minHeight:330}}>
-        <RegLTR rounds={bracket.regions.South?.rounds} label="South" color={RC.South}/>
-        <div style={{width:140,flexShrink:0}}/>
-        <RegRTL rounds={bracket.regions.Midwest?.rounds} label="Midwest" color={RC.Midwest}/>
       </div>
     </div>
   );
